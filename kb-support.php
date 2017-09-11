@@ -300,6 +300,7 @@ final class KB_Support {
 			require_once KBS_PLUGIN_DIR . 'includes/admin/extensions.php';
 			require_once KBS_PLUGIN_DIR . 'includes/admin/upgrades/upgrade-functions.php';
 			require_once KBS_PLUGIN_DIR . 'includes/admin/upgrades/upgrades.php';
+            require_once KBS_PLUGIN_DIR . 'includes/admin/tracking.php';
 			require_once KBS_PLUGIN_DIR . 'includes/admin/welcome.php';
 		}
 

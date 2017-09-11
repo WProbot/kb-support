@@ -111,6 +111,8 @@ if ( kbs_get_option( 'remove_on_uninstall' ) )	{
 		'kbs_version_upgraded_from',
 		$wpdb->prefix . 'kbs_customers_db_version',
 		$wpdb->prefix . 'kbs_customermeta_db_version',
+        'kbs_tracking_last_send',
+        'kbs_tracking_notice',
 		'kbs_install_version',
 		'kbs_installed'
 	);

@@ -845,7 +845,23 @@ function kbs_get_registered_settings() {
 						'name'    => __( 'Remove Data on Uninstall?', 'kb-support' ),
 						'desc'    => __( 'Check this box if you would like KBS to completely remove all of its data when the plugin is deleted.', 'kb-support' ),
 						'type'    => 'checkbox'
-					)
+					),
+                    'tracking_settings' => array(
+                        'id'   => 'tracking_settings',
+						'name' => '<h3>' . __( 'Tracking', 'kb-support' ) . '</h3>',
+						'desc' => '',
+						'type' => 'header'
+                    ),
+                    'allow_tracking' => array(
+						'id'      => 'allow_tracking',
+						'name'    => __( 'Allow Usage Tracking?', 'kb-support' ),
+						'desc'    => sprintf(
+                            __( 'Allow KB Support to anonymously track how this plugin is used and help us make the plugin better. Opt-in to tracking and our newsletter and immediately be emailed a 25%s discount to the KBS Plugin Store, valid towards the <a href="%s" target="_blank">purchase of extensions. No sensitive data is tracked.', 'kb-support' ),
+                            '%',
+                            'https://kb-support.com/extensions/'
+                        ),
+						'type'    => 'checkbox'
+					),
 				),
 				'recaptcha'     => array(
 					'recaptcha_settings' => array(
