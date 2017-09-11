@@ -37,13 +37,46 @@ class KBS_Tracking {
 	 */
 	public function __construct() {
 
-		add_action( 'init',                          array( $this, 'schedule_send' ) );
+		add_action( 'init',                          array( $this, 'schedule_send' ), 15 );
+        add_action( 'init',                          array( $this, 'process_actions' ), 15 );
 		add_action( 'kbs_settings_general_sanitize', array( $this, 'check_for_settings_optin' ) );
-		add_action( 'kbs_opt_into_tracking',         array( $this, 'check_for_optin' ) );
-		add_action( 'kbs_opt_out_of_tracking',       array( $this, 'check_for_optout' ) );
 		add_action( 'admin_notices',                 array( $this, 'admin_notice' ) );
 
 	} // __construct
+
+    /**
+	 * Process tracking actions.
+	 *
+	 * @access public
+	 * @return void
+	 */
+    public function process_actions()   {
+        if ( ! isset( $_GET['kbs-action'] ) )   {
+            return;
+        }
+
+        $action = sanitize_text_field( $_GET['kbs-action'] );
+
+        $actions = array( 'opt_into_tracking', 'opt_out_of_tracking' );
+
+        if ( ! in_array( $action, $actions ) )  {
+            return;
+        }
+
+        switch( $action )   {
+            case 'opt_into_tracking':
+                $this->check_for_optin();
+                break;
+
+            case 'opt_out_of_tracking':
+                $this->check_for_optout();
+                break;
+
+            default:
+                break;
+        }
+
+    } // process_actions
 
 	/**
 	 * Check if the user has opted into tracking
@@ -100,9 +133,28 @@ class KBS_Tracking {
 
 		$data['active_plugins']   = $active_plugins;
 		$data['inactive_plugins'] = $plugins;
-		$data['tickets']          = wp_count_posts( 'kbs_ticket' )->publish;
+
+        $tickets      = kbs_count_tickets();
+        $ticket_count = 0;
+
+        if ( ! empty( $tickets ) )	{
+            $active_statuses = kbs_get_ticket_status_keys( false );
+            foreach( $tickets as $status => $count )	{
+                if ( ! empty( $tickets->$status ) && in_array( $status, $active_statuses ) )	{
+                    $ticket_count += $count;
+                }
+            }
+        }
+
+        $article_count = 0;
+        $articles      = wp_count_posts( KBS()->KB->post_type );
+        if ( $articles && $articles->publish )   {
+            $article_count = number_format_i18n( $articles->publish );
+        }
+
+		$data['tickets']          = $ticket_count;
 		$data['ticket_label']     = kbs_get_ticket_label_singular( true );
-        $data['articles']         = wp_count_posts( 'article' )->publish;
+        $data['articles']         = $article_count;
 		$data['article_label']    = kbs_get_article_label_singular();
 		$data['locale']           = ( $data['wp_version'] >= 4.7 ) ? get_user_locale() : get_locale();
 
@@ -180,7 +232,7 @@ class KBS_Tracking {
 	 * @access public
 	 * @return void
 	 */
-	public function check_for_optin( $data ) {
+	public function check_for_optin() {
 
 		kbs_update_option( 'allow_tracking', 1 );
 
@@ -196,10 +248,15 @@ class KBS_Tracking {
 	 * @access public
 	 * @return void
 	 */
-	public function check_for_optout( $data ) {
+	public function check_for_optout() {
+
 		kbs_delete_option( 'allow_tracking' );
-		update_option( 'kbs_tracking_notice', '1' );
-		wp_redirect( remove_query_arg( 'kbs_action' ) ); exit;
+
+        update_option( 'kbs_tracking_notice', '1' );
+
+		wp_redirect( remove_query_arg( 'kbs-action' ) );
+        exit;
+
 	} // check_for_optout
 
 	/**
@@ -255,7 +312,7 @@ class KBS_Tracking {
 			$optout_url = add_query_arg( 'kbs-action', 'opt_out_of_tracking' );
 
 			$source         = substr( md5( get_bloginfo( 'name' ) ), 0, 10 );
-			$extensions_url = 'https://kb-support.com/downloads/?utm_source=' . $source . '&utm_medium=admin&utm_term=notice&utm_campaign=KBSUsageTracking';
+			$extensions_url = 'https://kb-support.com/extensions/?utm_source=' . $source . '&utm_medium=admin&utm_term=notice&utm_campaign=KBSUsageTracking';
 			echo '<div class="updated"><p>';
 				echo sprintf( __( 'Allow KB Support to track plugin usage? Opt-in to tracking and our newsletter and immediately be emailed a 25%s discount to the KBS plugin store, valid towards the <a href="%s" target="_blank">purchase of extensions</a>. No sensitive data is tracked.', 'kb-support' ), '%', $extensions_url );
 				echo '&nbsp;<a href="' . esc_url( $optin_url ) . '" class="button-secondary">' . __( 'Allow', 'kb-support' ) . '</a>';
