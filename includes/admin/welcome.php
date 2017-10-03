@@ -319,7 +319,7 @@ class KBS_Welcome {
                 <li><?php _e( 'Corrected CSS syntax which was causing alignment issue within the KB Article restrictions metabox', 'kb-support' ); ?></li>
                 <li><?php _e( 'Updated contextual help for settings screen', 'kb-support' ); ?></li>
                 <li><?php _e( 'Corrected variable name being passed via <code>kbs_auto_assign_agent</code> hook', 'kb-support' ); ?></li>
-                <li><?php _e( 'Added hook <code>kbs_update_ticket_meta</code> hook', 'kb-support' ); ?></li>
+                <li><?php _e( 'Added hook <code>kbs_update_ticket_meta_key</code> hook', 'kb-support' ); ?></li>
                 <li><?php _e( 'Set <code>$prev_value</code> when updating ticket meta if it is not passed to the function', 'kb-support' ); ?></li>
                 <li><?php _e( 'Added filter <code>kbs_disable_ticket_post_lock</code> to enable removal of post lock for tickets', 'kb-support' ); ?></li>
             </ul>

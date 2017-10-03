@@ -124,6 +124,7 @@ jQuery(document).ready(function ($) {
 	$(document).on('click', '.ticket_reply_content', function()	{
 		var reply_id = $(this).data('key');
 		$('#ticket_response_' + reply_id).toggle('fast');
+        kbs_cust_read_reply(reply_id);
 	});
 
 	$(document).on('click', '#kbs_ticket_reply_form #kbs_reply_submit', function(e) {
@@ -174,4 +175,17 @@ jQuery(document).ready(function ($) {
 		});
 
 	});
+
 });
+
+/* = Mark ticket replies as read
+====================================================================================== */
+function kbs_cust_read_reply(reply_id)  {
+    jQuery.post(
+        kbs_scripts.ajaxurl,
+        {
+            action: 'kbs_read_ticket_reply',
+            reply_id:    reply_id
+        }
+    );
+}

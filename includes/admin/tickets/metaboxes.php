@@ -264,16 +264,12 @@ function kbs_ticket_metabox_notes_callback()	{
  */
 function kbs_ticket_metabox_save_row( $ticket_id )	{
 
-	global $kbs_ticket, $kbs_ticket_update;
-
-	if ( ! $kbs_ticket_update ) : ?>
-    	<input type="hidden" name="_kbs_ticket_logged_by" id="kbs-ticket-logged-by" value="<?php echo get_current_user_id(); ?>" />
-    <?php endif; ?>
+	global $kbs_ticket, $kbs_ticket_update; ?>
 
 	<div class="submitbox" id="submitpost">
 		<div id="minor-publishing">
         	<div id="minor-publishing-actions">
-
+                <div class="clear"></div>
             </div><!-- #minor-publishing-actions -->
             <div id="kbs-ticket-actions">
 
@@ -427,7 +423,7 @@ function kbs_ticket_metabox_additional_agents_row( $ticket_id )	{
     }
 
     ?>
-    <div id="kbs-agent-options">
+    <div id="kbs-multi-agent-options">
         <p><label for="kbs_assigned_agents"><?php _e( 'Additional Agents', 'kb-support' ); ?>:</label>
             <?php echo KBS()->html->agent_dropdown( array(
                 'name'            => 'kbs_assigned_agents',
@@ -533,7 +529,7 @@ function kbs_ticket_metabox_files_row( $ticket_id )	{
 add_action( 'kbs_ticket_data_fields', 'kbs_ticket_metabox_files_row', 30 );
 
 /**
- * Display the ticket reply row.
+ * Display the ticket replies row.
  *
  * @since	1.0
  * @global	obj		$kbs_ticket			KBS_Ticket class object
@@ -541,17 +537,22 @@ add_action( 'kbs_ticket_data_fields', 'kbs_ticket_metabox_files_row', 30 );
  * @param	int		$ticket_id			The ticket post ID.
  * @return	str
  */
-function kbs_ticket_metabox_replies_row( $ticket_id )	{
+function kbs_ticket_metabox_existing_replies_row( $ticket_id )	{
 
 	global $kbs_ticket, $kbs_ticket_update;
 
 	?>
     <div id="kbs-replies-loader"></div>
-    <div id="kbs-replies-history" class="kbs_replies_accordion"></div>
+
+    <div id="kbs_historic_reply_fields" class="kbs_meta_table_wrap">
+        <div class="widefat">
+            <div class="kbs-historic-reply-option-fields"></div>
+        </div>
+    </div>
 	<?php
 
 } // kbs_ticket_metabox_replies_row
-add_action( 'kbs_ticket_reply_fields', 'kbs_ticket_metabox_replies_row', 10 );
+add_action( 'kbs_ticket_reply_fields', 'kbs_ticket_metabox_existing_replies_row', 10 );
 
 /**
  * Display the ticket reply row.
@@ -621,9 +622,16 @@ function kbs_ticket_metabox_notes_row( $ticket_id )	{
 
 	global $kbs_ticket, $kbs_ticket_update;
 
+	global $kbs_ticket, $kbs_ticket_update;
+
 	?>
     <div id="kbs-notes-loader"></div>
-    <div id="kbs-notes-history" class="kbs_notes_accordion"></div>
+
+    <div id="kbs_notes_fields" class="kbs_meta_table_wrap">
+        <div class="widefat">
+            <div class="kbs-notes-option-fields"></div>
+        </div>
+    </div>
 	<?php
 
 } // kbs_ticket_metabox_notes_row

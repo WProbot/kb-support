@@ -532,11 +532,11 @@ function kbs_get_registered_settings() {
 					'article_excerpt_length' => array(
 						'id'      => 'article_excerpt_length',
 						'name'    => __( 'Search Excerpt Length', 'kb-support' ),
-						'desc'    => __( 'Enter the number of words that should form the excerpt length during an ajax search. i.e. on the submission form.', 'kb-support' ),
+						'desc'    => __( 'Enter the number of words that should form the excerpt length during an ajax search. i.e. on the submission form. Enter <code>0</code> for no excerpt.', 'kb-support' ),
 						'type'    => 'number',
 						'step'    => '5',
 						'size'    => 'small',
-						'std'     => '55'
+						'std'     => '0'
 					)
 				),
 				'restricted_notices' => array(
@@ -773,8 +773,7 @@ function kbs_get_registered_settings() {
 						'id'   => 'agent_notices',
 						'name' => __( 'Assignment Notices', 'kb-support' ),
 						'desc' => sprintf( __( 'Check this box to enable notifications to agents when a %s is assigned to them.', 'kb-support' ), strtolower( $single ) ),
-						'type' => 'checkbox',
-                        'std'  => '1'
+						'type' => 'checkbox'
 					),
 					'agent_assigned_subject' => array(
 						'id'   => 'agent_assigned_subject',
@@ -1483,16 +1482,28 @@ function kbs_select_callback( $args ) {
 		$placeholder = '';
 	}
 
+	if ( ! empty( $args['multiple'] ) ) {
+		$multiple   = ' MULTIPLE';
+		$name_array = '[]';
+	} else {
+		$multiple   = '';
+		$name_array = '';
+	}
+
 	$class = kbs_sanitize_html_class( $args['field_class'] );
 
 	if ( isset( $args['chosen'] ) ) {
-		$class .= ' kbs-chosen';
+		$class .= ' kbs_select_chosen';
 	}
 
-	$html = '<select id="kbs_settings[' . kbs_sanitize_key( $args['id'] ) . ']" name="kbs_settings[' . esc_attr( $args['id'] ) . ']" class="' . $class . '" data-placeholder="' . esc_html( $placeholder ) . '" />';
+	$html = '<select id="kbs_settings[' . kbs_sanitize_key( $args['id'] ) . ']" name="kbs_settings[' . esc_attr( $args['id'] ) . ']' . $name_array . '" class="' . $class . '"' . $multiple . ' data-placeholder="' . esc_html( $placeholder ) . '" />';
 
 	foreach ( $args['options'] as $option => $name ) {
-		$selected = selected( $option, $value, false );
+		if ( ! empty( $multiple ) && is_array( $value ) ) {
+			$selected = selected( true, in_array( $option, $value ), false );
+		} else	{
+			$selected = selected( $option, $value, false );
+		}
 		$html .= '<option value="' . esc_attr( $option ) . '" ' . $selected . '>' . esc_html( $name ) . '</option>';
 	}
 

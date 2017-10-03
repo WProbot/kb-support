@@ -3,16 +3,16 @@
  * Plugin Name: KB Support
  * Plugin URI: https://kb-support.com/
  * Description: The ultimate help desk and knowledge base support tool plugin for WordPress.
- * Version: 1.1
- * Date: 30 August 2017
+ * Version: 1.1.3
+ * Date: 2 October 2017
  * Author: KB Support Team
- * Author URI: https://kb-support.com
+ * Author URI: https://kb-support.com/
  * Text Domain: kb-support
  * Domain Path: /languages
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * GitHub Plugin URI: https://github.com/KB-Support/kb-support
- * Tags:  Helpdesk, Help Desk, Support, Customer Support, Service, Service Desk, ITIL, Support Helpdesk, Ticket, Ticket System, Support Tickets, Helpdesk Tickets, Knowledgebase, Knowledge Base, Service Level, SLA
+ * Tags:  Helpdesk, Support, Customer Support, Support Desk, Ticket System, Knowledge Base, Tickets, Service, Service Desk, ITIL, Support Helpdesk, Ticket, Support Tickets, Helpdesk Tickets, Knowledgebase, Service Level, SLA, Help Desk
  *
  *
  * KB Support is free software; you can redistribute it and/or modify
@@ -186,7 +186,7 @@ final class KB_Support {
 	private function setup_constants()	{
 
 		if ( ! defined( 'KBS_VERSION' ) )	{
-			define( 'KBS_VERSION', '1.1' );
+			define( 'KBS_VERSION', '1.1.3' );
 		}
 
 		if ( ! defined( 'KBS_PLUGIN_DIR' ) )	{
@@ -317,11 +317,16 @@ final class KB_Support {
 	 */
 	public function load_textdomain()	{
 
-		load_plugin_textdomain( 
-			'kb-support',
-			false, 
-			dirname( plugin_basename(__FILE__) ) . '/languages'
-		);
+        // Set filter for plugin's languages directory.
+		$kbs_lang_dir  = dirname( plugin_basename( KBS_PLUGIN_FILE ) ) . '/languages/';
+		$kbs_lang_dir  = apply_filters( 'kbs_languages_directory', $kbs_lang_dir );
+
+		// Traditional WordPress plugin locale filter.
+        $locale = is_admin() && function_exists( 'get_user_locale' ) ? get_user_locale() : get_locale();
+        $locale = apply_filters( 'plugin_locale', $locale, 'kb-support' );
+
+        load_textdomain( 'kb-support', WP_LANG_DIR . '/kb-support/kb-support-' . $locale . '.mo' );
+        load_plugin_textdomain( 'kb-support', false, $kbs_lang_dir );
 
 	} // load_textdomain
 	

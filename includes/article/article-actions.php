@@ -26,7 +26,7 @@ function kbs_search_articles_action()	{
 	}
 
 	$args = array(
-		's'                   => $_GET['s_article'],
+		's'                   => urlencode( $_GET['s_article'] ),
 		'post_type'           => KBS()->KB->post_type,
 		'ignore_sticky_posts' => true,
 		'cache_results'       => false,

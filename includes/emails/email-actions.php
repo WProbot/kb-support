@@ -58,7 +58,48 @@ function kbs_trigger_agent_assigned_email( $meta_key, $meta_value, $prev_value, 
 	}
 
 } // kbs_trigger_agent_assigned_email
-add_action( 'kbs_update_ticket_meta', 'kbs_trigger_agent_assigned_email', 999, 4 );
+add_action( 'kbs_update_ticket_meta_key', 'kbs_trigger_agent_assigned_email', 999, 4 );
+
+/**
+ * Add additional agents to reply notifications.
+ *
+ * @since   1.1
+ * @param   str     $headers    Email headers
+ * @param   int     $ticket_id  Ticket ID
+ * @param   arr     $data       Reply data
+ *
+ */
+function kbs_add_additional_agents_to_reply_notifications( $headers, $ticket_id, $data ) {
+
+    if ( kbs_multiple_agents() )  {
+        $agents = kbs_get_workers_of_ticket( $ticket_id );
+
+        if ( ! empty( $agents ) )   {
+            $emails = kbs_get_option( 'admin_notice_emails', false );
+            $emails = strlen( trim( $emails ) ) > 0 ? $emails : get_bloginfo( 'admin_email' );
+            $emails = array_map( 'trim', explode( "\n", $emails ) );
+
+            if ( in_array( '{agent}', $emails ) )   {
+                $agent_emails = array();
+                foreach( $agents as $agent_id ) {
+                    $agent_data = get_userdata( $agent_id );
+
+                    if ( $agent_data )  {
+                        $agent_emails[] = $agent_data->user_email;
+                    }
+                }
+
+                if ( ! empty( $agent_emails ) ) {
+                    $headers .= 'Cc: ' . implode( ',', $agent_emails ) . "\r\n";
+                }
+
+            }
+        }
+    }
+
+    return $headers;
+} // kbs_add_additional_agents_to_reply_notifications
+add_action( 'kbs_admin_reply_notification_headers', 'kbs_add_additional_agents_to_reply_notifications', 10, 3 );
 
 /**
  * Trigger the sending of a Test Email

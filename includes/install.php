@@ -103,7 +103,11 @@ function kbs_run_install() {
 					if ( 'checkbox' == $option['type'] )	{
 						$options[ $option['id'] ] = '1';
 					} else	{
-						$options[ $option['id'] ] = $option['std'];
+                        if ( 'article_excerpt_length' == $option['id'] )    {
+                            $options[ $option['id'] ] = '55';
+                        } else  {
+						  $options[ $option['id'] ] = $option['std'];
+                        }
 					}
 					
 				}

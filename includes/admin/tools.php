@@ -433,7 +433,7 @@ function kbs_tools_import_display() {
 	<div class="postbox">
 		<h3><span><?php _e( 'Import Settings', 'kb-support' ); ?></span></h3>
 		<div class="inside">
-			<p><?php _e( 'Import the KB Support settings from a .json file. This file can be obtained by exporting the settings on another site using the form above.', 'kb-support' ); ?></p>
+			<p><?php _e( 'Import the KB Support settings from a .json file. This file can be obtained by exporting the settings on another site using the form within the Export tab.', 'kb-support' ); ?></p>
 			<form method="post" enctype="multipart/form-data" action="<?php echo admin_url( 'edit.php?post_type=kbs_ticket&page=kbs-tools&tab=import' ); ?>">
 				<p>
 					<input type="file" name="import_file"/>

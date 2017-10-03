@@ -15,20 +15,6 @@ jQuery(document).ready(function ($) {
 		inherit_select_classes: true
 	});
 
-	// Setup Accordions
-	if ( kbs_vars.post_type && 'kbs_ticket' === kbs_vars.post_type )	{
-		var icons = {
-			header: 'ui-icon-circle-arrow-e',
-			activeHeader: 'ui-icon-circle-arrow-s'
-		};
-
-		$( '.kbs_accordion, .kbs_notes_accordion, .kbs_replies_accordion' ).accordion({
-			active: false,
-			collapsible: true,
-			icons:icons
-		});
-	}
-
 	/**
 	 * Settings screen JS
 	 */
@@ -286,6 +272,39 @@ jQuery(document).ready(function ($) {
 			}
 		}
 	};
+
+    // Toggle display of historic ticket replies
+	$( document.body ).on( 'click', '.toggle-view-reply-option-section', function(e) {
+		e.preventDefault();
+		var show = $(this).html() === kbs_vars.view_reply ? true : false;
+
+		if ( show ) {
+			$(this).html( kbs_vars.hide_reply );
+		} else {
+			$(this).html( kbs_vars.view_reply );
+		}
+
+		var header = $(this).parents('.kbs-replies-row-header');
+		header.siblings('.kbs-replies-content-wrap').slideToggle();
+
+	});
+
+	// Toggle display of ticket notes
+	$( document.body ).on( 'click', '.toggle-view-note-option-section', function(e) {
+		e.preventDefault();
+		var show = $(this).html() === kbs_vars.view_note ? true : false;
+
+		if ( show ) {
+			$(this).html( kbs_vars.hide_note );
+		} else {
+			$(this).html( kbs_vars.view_note );
+		}
+
+		var header = $(this).parents('.kbs-notes-row-header');
+		header.siblings('.kbs-notes-content-wrap').slideToggle();
+
+	});
+
 	KBS_Tickets.init();
 	
 	/**
@@ -894,8 +913,7 @@ function kbs_load_ticket_replies( ticket_id, reply_id )	{
 
 	jQuery.post(ajaxurl, { action: 'kbs_display_ticket_replies', kbs_ticket_id: ticket_id, kbs_reply_id: reply_id },
 		function(response)	{
-			jQuery('.kbs_replies_accordion').prepend(response);
-			jQuery('.kbs_replies_accordion').accordion('refresh');
+			jQuery('.kbs-historic-reply-option-fields').prepend(response);
 			jQuery('#kbs-replies-loader').html('');
 		}
 	);
@@ -907,8 +925,7 @@ function kbs_load_ticket_notes( ticket_id, note_id )	{
 
 	jQuery.post(ajaxurl, { action: 'kbs_display_ticket_notes', kbs_ticket_id: ticket_id, kbs_note_id: note_id },
 		function(response)	{
-			jQuery('.kbs_notes_accordion').prepend(response);
-			jQuery('.kbs_notes_accordion').accordion('refresh');
+			jQuery('.kbs-notes-option-fields').prepend(response);
 			jQuery('#kbs-notes-loader').html('');
 		}
 	);

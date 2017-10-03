@@ -167,7 +167,9 @@ function kbs_ajax_display_ticket_replies()	{
 	
 		if ( ! empty( $replies ) )	{
 			foreach( $replies as $reply )	{
-				$output .= kbs_get_reply_html( $reply, $_POST['kbs_ticket_id'] );
+                $output .= '<div class="kbs_historic_replies_wrapper">';
+                    $output .= kbs_get_reply_html( $reply, $_POST['kbs_ticket_id'] );
+                $output .= '</div>';
 			}
 		}
 
@@ -177,6 +179,25 @@ function kbs_ajax_display_ticket_replies()	{
 	die();
 } // kbs_ajax_display_ticket_replies
 add_action( 'wp_ajax_kbs_display_ticket_replies', 'kbs_ajax_display_ticket_replies' );
+
+/**
+ * Mark a reply as read.
+ *
+ * @since   1.2
+ * @return  void
+ */
+function kbs_ajax_mark_reply_as_read() {
+
+    $reply_id = isset( $_POST['reply_id'] )    ? $_POST['reply_id']    : 0;
+    
+    if ( ! empty( $reply_id ) )   {
+        kbs_mark_reply_as_read( $reply_id );
+    }
+
+    wp_send_json_success();
+} // kbs_ajax_mark_reply_as_read
+add_action( 'wp_ajax_kbs_read_ticket_reply', 'kbs_ajax_mark_reply_as_read' );
+add_action( 'wp_ajax_nopriv_kbs_read_ticket_reply', 'kbs_ajax_mark_reply_as_read' );
 
 /**
  * Validate a ticket reply form.
@@ -269,10 +290,12 @@ function kbs_ajax_display_ticket_notes()	{
 	} else	{
 
 		$notes  = kbs_get_notes( $_POST['kbs_ticket_id'] );
-	
+
 		if ( ! empty( $notes ) )	{
 			foreach( $notes as $note )	{
-				$output .= kbs_get_note_html( $note, $_POST['kbs_ticket_id'] );
+				$output .= '<div class="kbs_ticket_notes_wrapper">';
+					$output .= kbs_get_note_html( $note, $_POST['kbs_ticket_id'] );
+				$output .= '</div>';
 			}
 		}
 
@@ -570,7 +593,7 @@ function kbs_ajax_article_search()	{
 
 	$output      = false;
 	$results     = false;
-	$search_term = $_POST['term'];
+	$search_term = urlencode( $_POST['term'] );
 
 	$args = array(
 		'number'  => kbs_get_option( 'article_num_posts_ajax', 5 ),
@@ -594,8 +617,11 @@ function kbs_ajax_article_search()	{
 				$output .= '<a href="' . get_post_permalink( $article->ID ) . '" target="_blank">';
 					$output .= esc_attr( $article->post_title );
 				$output .= '</a>';
-				$output .= '<br />';
-				$output .= kbs_get_article_excerpt( $article->ID );
+
+				if ( kbs_get_article_excerpt_length() > 0 )	{
+					$output .= '<br />';
+					$output .= kbs_get_article_excerpt( $article->ID );
+				}
 
 			$output .= '</li>';
 		}

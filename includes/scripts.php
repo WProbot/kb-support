@@ -215,6 +215,7 @@ function kbs_load_admin_scripts( $hook ) {
 		'no_ticket_reply_content' => __( 'There is no content in your reply', 'kb-support' ),
 		'ticket_confirm_close'    => __( 'Are you sure you wish to close this ticket? Click OK to close, or Cancel to return.', 'kb-support' ),
 		'ticket_reply_failed'     => sprintf( __( 'Could not add %s Reply', 'kb-support' ), kbs_get_ticket_label_singular() ),
+		'ticket_reply_added'      => 'ticket_reply_added',
 		'no_note_content'         => __( 'There is no content in your note', 'kb-support' ),
 		'note_not_added'          => __( 'Your note could not be added', 'kb-support' ),
 		'type_to_search'          => sprintf( __( 'Type to search %s', 'kb-support' ), kbs_get_article_label_plural() ),
@@ -222,7 +223,11 @@ function kbs_load_admin_scripts( $hook ) {
 		'editing_field_type'      => $editing_field_type,
 		'field_label_missing'     => __( 'Enter a Label for your field.', 'kb-support' ),
 		'field_type_missing'      => __( 'Select the field Type', 'kb-support' ),
-        'reply_has_data'          => sprintf( __( 'You have not submitted the reply. If you continue, the reply will not be added to the %s', 'kb-support' ), kbs_get_ticket_label_singular( true ) )
+        'reply_has_data'          => sprintf( __( 'You have not submitted the reply. If you continue, the reply will not be added to the %s', 'kb-support' ), kbs_get_ticket_label_singular( true ) ),
+        'view_reply'              => __( 'View Reply', 'kb-support' ),
+		'hide_reply'              => __( 'Hide Reply', 'kb-support' ),
+		'view_note'               => __( 'View Note', 'kb-support' ),
+		'hide_note'               => __( 'Hide Note', 'kb-support' )
 	) );
 
 	if ( function_exists( 'wp_enqueue_media' ) && version_compare( $wp_version, '3.5', '>=' ) ) {
@@ -242,14 +247,6 @@ function kbs_load_admin_scripts( $hook ) {
 	wp_enqueue_script( 'media-upload' );
 	wp_enqueue_script( 'thickbox' );
 	wp_enqueue_style( 'thickbox' );
-
-	if ( 'post.php' == $hook || 'post-new.php' == $hook )	{
-
-		if ( isset( $_GET['post'] ) && 'kbs_ticket' == get_post_type( $_GET['post'] ) )	{
-			wp_enqueue_script( 'jquery-ui-accordion' );
-		}
-		
-	}
 
 } // kbs_load_admin_scripts
 add_action( 'admin_enqueue_scripts', 'kbs_load_admin_scripts' );

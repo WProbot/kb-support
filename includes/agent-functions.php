@@ -297,7 +297,7 @@ function kbs_set_agent_status()	{
 		$screen   = get_current_screen();
 
 		if ( ! empty( $agent_id ) && kbs_is_agent( $agent_id ) )	{
-			$transient_key = '_kbs_active_agent_' . $agent_id;
+			$transient_key = 'kbs_active_agent_' . $agent_id;
 			set_transient( $transient_key, $screen->id, $expire );
 		}
 
@@ -316,7 +316,7 @@ add_action( 'current_screen', 'kbs_set_agent_status' );
  * @return	mixed	True if online, or false
  */
 function kbs_get_agent_status( $agent_id )	{
-	return get_transient( '_kbs_active_agent_' . $agent_id );
+	return get_transient( 'kbs_active_agent_' . $agent_id );
 } // kbs_get_agent_status
 
 /**
@@ -356,7 +356,7 @@ function kbs_set_agent_offline( $agent_id = 0 )	{
 	}
 
 	if ( kbs_is_agent( $agent_id ) )	{
-		delete_transient( '_kbs_active_agent_' . $agent_id );
+		delete_transient( 'kbs_active_agent_' . $agent_id );
 	}
 } // kbs_set_agent_offline
 add_action( 'login_form_logout', 'kbs_set_agent_offline' );

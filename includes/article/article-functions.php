@@ -278,9 +278,7 @@ function kbs_get_article_excerpt( $article_id ) {
 	}
 
 	$num_words = kbs_get_article_excerpt_length();
-	$num_words = apply_filters( 'kbs_article_excerpt_length', $num_words );
-
-	$excerpt = wp_trim_words( $excerpt, $num_words, '&hellip;' );
+	$excerpt   = wp_trim_words( $excerpt, $num_words, '&hellip;' );
 
 	return apply_filters( 'kbs_article_excerpt', $excerpt );
 

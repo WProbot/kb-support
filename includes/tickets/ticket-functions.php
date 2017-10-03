@@ -1293,35 +1293,84 @@ function kbs_get_reply_html( $reply, $ticket_id = 0 ) {
 
 	$create_article_link = apply_filters( 'kbs_create_article_link', $create_article_link, $ticket_id, $reply );
 
-	$reply_html  ='<h3>';
-		$reply_html .= $author . '&nbsp;&ndash;&nbsp;' . date_i18n( $date_format, strtotime( $reply->post_date ) );
-		if ( $file_count )	{
-			$reply_html .= ' (' . $file_count . ' ' . _n( 'attached file', 'attached files', $file_count, 'kb-support' ) . ')';
-		}
-	$reply_html .= '</h3>';
+    $actions = array(
+        'read_reply'     => '<a href="#" class="toggle-view-reply-option-section">' . __( 'View Reply', 'kb-support' ) . '</a>',
+        'create_article' => '<a href="' . $create_article_link . '" class="toggle-reply-option-create-article">' . sprintf( __( 'Create %s', 'kb-support' ), kbs_get_article_label_singular() ) . '</a>'
+    );
 
-	$reply_html .= '<div>';
-		$reply_html .= '<p class="right">';
-			$reply_html .= '<a class="create_article" href="' . $create_article_link . '">' . sprintf( __( 'Create %s', 'kb-support' ), kbs_get_article_label_singular() ) . '</a>';
-		$reply_html .= '</p>';
-		$reply_html .= wpautop( $reply->post_content );
+    $actions = apply_filters( 'kbs_ticket_replies_actions', $actions, $reply );
 
-		if ( $files )	{
+    $icons   = array();
 
-			$reply_html .= '<ul>';
+    if ( false === strpos( $author, __( 'Customer', 'kb-support' ) ) )  {
+        $is_read = kbs_reply_is_read( $reply->ID );
+        if ( $is_read )  {
+            $icons['is_read'] = sprintf(
+                '<span class="dashicons dashicons-visibility" title="%s %s"></span>',
+                __( 'Read by customer on', 'kb-support' ),
+                date_i18n( $date_format, strtotime( $is_read ) )
+            );
+        } else  {
+            $icons['not_read'] = sprintf(
+                '<span class="dashicons dashicons-hidden" title="%s"></span>',
+                __( 'Customer has not read', 'kb-support' )
+            );
+        }
+    }
 
-			foreach( $files as $file )	{
-				$reply_html .= '<li>';
-					$reply_html .= '<a href="' . wp_get_attachment_url( $file->ID ) . '" target="_blank">' . basename( get_attached_file( $file->ID ) ) . '</a>';
-				$reply_html .= '</li>';
-			}
+    if ( $file_count )  {
+        $icons['files'] = sprintf(
+            '<span class="dashicons dashicons-media-document" title="%s"></span>',
+            $file_count . ' ' . _n( 'attached file', 'attached files', $file_count, 'kb-support' )
+        );
+    }
 
-			$reply_html .= '</ul>';
-		}
+    $icons   = apply_filters( 'kbs_ticket_replies_icons', $icons, $reply );
 
-	$reply_html .= '</div>';
+    ob_start(); ?>
 
-	return $reply_html;
+    <div class="kbs-replies-row-header">
+        <span class="kbs-replies-row-title">
+            <?php echo apply_filters( 'kbs_replies_title', sprintf( __( '%s by %s', 'kb-support' ), date_i18n( $date_format, strtotime( $reply->post_date ) ), $author ), $reply ); ?>
+        </span>
+
+        <span class="kbs-replies-row-actions">
+            <?php echo implode( ' ', $icons ); ?>
+			<?php echo implode( '&nbsp;&#124;&nbsp;', $actions ); ?>
+        </span>
+    </div>
+
+    <div class="kbs-replies-content-wrap">
+        <div class="kbs-replies-content-sections">
+        	<?php do_action( 'kbs_before_reply_content_section', $reply ); ?>
+            <div id="kbs-reply-option-section-<?php echo $reply->ID; ?>" class="kbs-replies-content-section">
+                <?php do_action( 'kbs_replies_before_content', $reply ); ?>
+                <?php echo wpautop( $reply->post_content ); ?>
+                <?php do_action( 'kbs_replies_content', $reply ); ?>
+            </div>
+            <?php do_action( 'kbs_after_reply_content_section', $reply ); ?>
+            <?php if ( $files ) : ?>
+                <div class="kbs-replies-files-section">
+                	<?php do_action( 'kbs_replies_before_files', $reply ); ?>
+                    <ol>
+                        <?php foreach( $files as $file ) : ?>
+                            <li>
+                            	<a href="<?php echo wp_get_attachment_url( $file->ID ); ?>" target="_blank">
+									<?php echo basename( get_attached_file( $file->ID ) ); ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                    <?php do_action( 'kbs_replies_after_files', $reply ); ?>
+                </div>
+            <?php endif; ?>
+            <?php do_action( 'kbs_aw_after_reply_content_section', $reply ); ?>
+        </div>
+    </div>
+
+    <?php
+
+    return ob_get_clean();
 
 } // kbs_get_reply_html
 
@@ -1368,6 +1417,70 @@ function kbs_get_reply_author_name( $reply, $role = false )	{
 	return apply_filters( 'kbs_reply_author_name', $author, $reply, $role, $author_role );
 
 } // kbs_get_reply_author_name
+
+/**
+ * Retrieve ticket ID from reply.
+ *
+ * @since   1.2
+ * @param   int     $reply_id
+ * @return  int|false
+ */
+function kbs_get_ticket_id_from_reply( $reply_id )  {
+    $ticket_id = get_post_field( 'post_parent', $reply_id );
+    return apply_filters( 'kbs_ticket_id_from_reply', $ticket_id );
+} // kbs_get_ticket_id_from_reply
+
+/**
+ * Mark a reply as read.
+ *
+ * @since   1.2
+ * @param   int     $reply_id
+ * @return  int|false
+ */
+function kbs_mark_reply_as_read( $reply_id )  {
+
+    $ticket_id = kbs_get_ticket_id_from_reply( $reply_id );
+
+    if ( empty( $ticket_id) )   {
+        return false;
+    }
+
+    $ticket      = new KBS_Ticket( $ticket_id );
+    $customer_id = $ticket->customer_id;
+
+    if ( ! empty( $customer_id ) )  {
+        $user_id = get_current_user_id();
+        if ( ! empty( $user_id ) )  {
+            if ( $user_id !== $customer_id )    {
+                $mark_read = false;
+            }
+        }
+    }
+
+    $mark_read = apply_filters( 'kbs_mark_reply_as_read', true, $reply_id, $ticket );
+
+    if ( ! $mark_read ) {
+        return false;
+    }
+
+    do_action( 'kbs_customer_read_reply', $reply_id, $ticket );
+
+    return add_post_meta( $reply_id, '_kbs_reply_customer_read', current_time( 'mysql'), true );
+
+} // kbs_mark_reply_as_read
+
+/**
+ * Whether or not a reply has been read.
+ *
+ * @since   1.2
+ * @param   int         $reply_id
+ * @return  str|false   false if unread, otherwise the datetime the reply was read.
+ */
+function kbs_reply_is_read( $reply_id ) {
+    $read = get_post_meta( $reply_id, '_kbs_reply_customer_read', true );
+
+    return apply_filters( 'kbs_reply_is_read', $read, $reply_id );
+} // kbs_reply_is_read
 
 /**
  * Retrieve all notes attached to a ticket.
@@ -1474,7 +1587,8 @@ function kbs_get_note_html( $note, $ticket_id = 0 ) {
 		$user = __( 'KBS Bot', 'kb-support' );
 	}
 
-	$date_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
+	$delete_note_cap = apply_filters( 'kbs_delete_note_cap', 'manage_ticket_settings', $note, $user );
+	$date_format     = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
 
 	$delete_note_url = wp_nonce_url( add_query_arg( array(
 		'kbs-action' => 'delete_ticket_note',
@@ -1482,16 +1596,43 @@ function kbs_get_note_html( $note, $ticket_id = 0 ) {
 		'ticket_id'  => $ticket_id
 	), admin_url() ), 'kbs_delete_ticket_note_' . $note->comment_ID, 'kbs_note_nonce' );
 
-	$note_html  ='<h3>';
-		$note_html .= date_i18n( $date_format, strtotime( $note->comment_date ) ) . '&nbsp;&ndash;&nbsp;' . $user;
-	$note_html .= '</h3>';
+	$actions = array(
+        'read_note'   => '<a href="#" class="toggle-view-note-option-section">' . __( 'View Note', 'kb-support' ) . '</a>',
+        'delete_note' => '<a href="' . $delete_note_url . '" class="kbs-remove-row kbs-delete">' . __( 'Delete Note', 'kb-support' ) . '</a>'
+    );
 
-	$note_html .= '<div>';
-		$note_html .= '<p class="kbs-delete"><a href="' . esc_url( $delete_note_url ) . '" class="kbs-delete">' . __( 'Delete', 'kb-support' ) . '</a></p>';
-		$note_html .= wpautop( $note->comment_content );
-	$note_html .= '</div>';
+	if ( $note->user_id != get_current_user_id() && ! current_user_can( $delete_note_cap ) )	{
+		unset( $actions['delete_note'] );
+	}
 
-	return $note_html;
+	$actions = apply_filters( 'kbs_ticket_notes_actions', $actions, $note );
+
+	ob_start(); ?>
+
+    <div class="kbs-notes-row-header">
+        <span class="kbs-notes-row-title">
+            <?php echo apply_filters( 'kbs_notes_title', sprintf( __( '%s by %s', 'kb-support' ), date_i18n( $date_format, strtotime( $note->comment_date ) ), $user ), $note ); ?>
+        </span>
+
+        <span class="kbs-notes-row-actions">
+			<?php echo implode( '&nbsp;&#124;&nbsp;', $actions ); ?>
+        </span>
+    </div>
+
+    <div class="kbs-notes-content-wrap">
+        <div class="kbs-notes-content-sections">
+            <div class="kbs-notes-content-section">
+                <?php do_action( 'kbs_ticket_notes_before_content', $note ); ?>
+                <?php echo wpautop( $note->comment_content ); ?>
+                <?php do_action( 'kbs_ticket_notes_content', $note ); ?>
+            </div>
+            <?php do_action( 'kbs_ticket_notes_note', $note ); ?>
+        </div>
+    </div>
+
+    <?php
+
+    return ob_get_clean();
 
 } // kbs_get_note_html
 

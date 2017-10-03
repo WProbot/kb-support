@@ -195,7 +195,7 @@ function kbs_process_register_form() {
 		die();
 	}
 
-	$redirect = apply_filters( 'kbs_register_redirect', $data['kbs_redirect'] );
+	$redirect = apply_filters( 'kbs_register_redirect', $_POST['kbs_redirect'] );
 
 	kbs_register_and_login_new_user( array(
 		'user_login'      => $_POST['kbs_user_login'],

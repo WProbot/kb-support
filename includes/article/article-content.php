@@ -93,7 +93,7 @@ function kbs_article_format_content( $type = 'single' )	{
  */
 
 function kbs_get_article_excerpt_length()	{
-	$length = kbs_get_option( 'kbs_article_excerpt_length', 55 );
+	$length = kbs_get_option( 'article_excerpt_length', 0 );
 
 	return (int) apply_filters( 'kbs_article_excerpt_length', $length );
 } // kbs_get_article_excerpt_length

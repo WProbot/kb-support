@@ -76,6 +76,21 @@ function kbs_set_kbs_ticket_post_columns( $columns ) {
 add_filter( 'manage_kbs_ticket_posts_columns' , 'kbs_set_kbs_ticket_post_columns' );
 
 /**
+ * Define which columns are sortable for ticket posts
+ *
+ * @since	1.0.9
+ * @param	arr		$sortable_columns	Array of sortable columns
+ * @return	arr		Array of sortable columns
+ */
+function kbs_ticket_post_sortable_columns( $sortable_columns )	{
+	$sortable_columns['id']    = 'id';
+    $sortable_columns['dates'] = 'date';
+	
+	return $sortable_columns;
+} // kbs_ticket_post_sortable_columns
+add_filter( 'manage_edit-kbs_ticket_sortable_columns', 'kbs_ticket_post_sortable_columns' );
+
+/**
  * Define the data to be displayed within the KBS ticket post custom columns.
  *
  * @since	1.0
@@ -105,18 +120,39 @@ function kbs_set_kbs_ticket_column_data( $column_name, $post_id ) {
 			break;
 
 		case 'ticket_category':
-			$terms = get_the_term_list( $post_id, 'ticket_category', '', '<br />', '');
+            $terms = wp_get_post_terms( $post_id, 'ticket_category' );
 			if ( $terms )	{
-				echo $terms;
+				$output = array();
+
+                foreach( $terms as $term )  {
+                    $output[] = sprintf(
+                        '<a href="%s">' . $term->name . '</a>',
+                        add_query_arg( 'ticket_category', $term->slug )
+                    );
+                }
+
+				echo implode( ', ', $output );
+
 			} else	{
 				echo '&mdash;';
 			}
 			break;
 
 		case 'ticket_tag':
-			$terms = get_the_term_list( $post_id, 'ticket_tag', '', '<br />', '');
+			$terms = wp_get_post_terms( $post_id, 'ticket_tag' );
 			if ( $terms )	{
-				echo $terms;
+				$output = array();
+
+                foreach( $terms as $term )  {
+                    $output[] = sprintf(
+                        '<a href="%s">' . $term->name . '</a>',
+                        add_query_arg( 'ticket_tag', $term->slug )
+                    );
+
+                }
+
+				echo implode( ', ', $output );
+
 			} else	{
 				echo '&mdash;';
 			}
@@ -256,6 +292,47 @@ function kb_tickets_post_column_sla( $ticket_id, $kbs_ticket )	{
 	return implode( '<br />', $output );
 
 } // kb_tickets_post_column_sla
+
+/**
+ * Order tickets.
+ *
+ * @since	1.0.9
+ * @param	obj		$query		The WP_Query object
+ * @return	void
+ */
+function kbs_order_admin_tickets( $query )	{
+	
+	if ( ! is_admin() || 'kbs_ticket' != $query->get( 'post_type' ) )	{
+		return;
+	}
+
+    return;
+
+	$orderby = '' == $query->get( 'orderby' ) ? 'date' : $query->get( 'orderby' );
+	$order   = '' == $query->get( 'order' )   ? 'DESC' : $query->get( 'order' );
+
+	switch( $orderby )	{
+		case 'ID':
+        case 'id':
+			$query->set( 'orderby',  'ID' );
+			$query->set( 'order',  $order );
+			break;
+
+		case 'post_date':
+        case 'date':
+        case 'dates':
+			$query->set( 'orderby',  'post_date' );
+			$query->set( 'order',  $order );
+			break;
+
+		case 'title':
+			$query->set( 'orderby',  'ID' );
+			$query->set( 'order',  $order );
+			break;			
+	}
+	
+} // kbs_order_admin_tickets
+add_action( 'pre_get_posts', 'kbs_order_admin_tickets' );
 
 /**
  * Filter tickets query so agents only see their own tickets and new tickets.

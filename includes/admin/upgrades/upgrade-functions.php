@@ -55,6 +55,9 @@ function kbs_do_automatic_upgrades() {
 
     if ( version_compare( $kbs_version, '1.1', '<' ) ) {
 		kbs_v11_upgrades();
+        // A quick update was applied after 1.1 so we need to ensure
+        // we still redirect to the welcome page
+        set_transient( '_kbs_activation_redirect', true, 30 );
 	}
 
 	if ( version_compare( $kbs_version, KBS_VERSION, '<' ) )	{
