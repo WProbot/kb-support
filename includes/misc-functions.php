@@ -603,7 +603,13 @@ function kbs_get_newsletter()    {
 						<input type="text" name="LNAME" id="mce-LNAME" placeholder="<?php esc_attr_e( 'Last Name', 'kb-support' ); ?>" class="" value="" />
 					</td>
 					<td>
-						<input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="<?php esc_attr_e( 'Subscribe', 'kb-support' ); ?>" />
+					    <?php submit_button(
+                            __( 'Subscribe', 'kb-support' ),
+                            'secondary',
+                            'subscribe',
+                            false,
+                            array( 'id' => 'mc-embedded-subscribe' )
+                        ); ?>
 					</td>
 				</tr>
 			</table>

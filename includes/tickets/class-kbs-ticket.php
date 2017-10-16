@@ -1081,7 +1081,8 @@ class KBS_Ticket {
 		add_post_meta( $this->ID, '_kbs_ticket_closed_date', current_time( 'mysql' ), true );
 
 		if ( is_admin() )	{
-			add_post_meta( $this->ID, '_kbs_ticket_closed_by', get_current_user_id(), true );
+            $closed_by = apply_filters( 'kbs_ticket_closed_by', get_current_user_id(), $this );
+			add_post_meta( $this->ID, '_kbs_ticket_closed_by', $closed_by, true );
 		}
 
 		do_action( 'kbs_close_ticket', $this->ID, $this );
